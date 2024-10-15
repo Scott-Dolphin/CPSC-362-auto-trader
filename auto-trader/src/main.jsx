@@ -6,13 +6,18 @@ import {
 } from "react-router-dom";
 import './index.css';
 
+// include pages here
 import Root from "./routes/Root"
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <div>Hello, World!</div>,
+    element: <Root />,
   },
+  // {
+  //   path: "/page",
+  //   element: <Element />,
+  // },
 ]);
 
 
