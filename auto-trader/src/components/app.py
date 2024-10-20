@@ -24,9 +24,9 @@ def echo():
 def get_stock_data(symbol):
     try:
         ETF = yf.Ticker(symbol)
-        data = ETF.funds_data
+        data = ETF.info
 
-        return jsonify(data.fund_overview)
+        return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
