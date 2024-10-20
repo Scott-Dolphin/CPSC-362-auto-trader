@@ -7,7 +7,7 @@ export default function Navbar() {
 
     const Download = async () => {
         try {
-            const response = await fetch('http://192.168.1.52:5000/api/data', {
+            const response = await fetch('http://192.168.1.52:5000/api/stock/FNGU', {
               method: 'GET',
               headers: {
                 'Content-Type': 'application/json',
