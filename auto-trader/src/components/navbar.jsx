@@ -40,7 +40,7 @@ export default function Navbar() {
                 <option value="FNGU">FNGU</option>
                 <option value="FNGD">FNGD</option>
             </select>
-            <Button onClick={() => Download()}>download</Button>
+            <Button onClick={() => Download()}>Download</Button>
         </div>
     );
 }

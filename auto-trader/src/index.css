@@ -1,17 +1,27 @@
-
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #141b23;
+}
 
 .nav {
-    /* border: 1px solid black; */
     width: 300px;
-    height:50px;
+    height:40px;
     margin: auto;
     display: flex;
     justify-content: space-between;
 
 }
 
-/* .nav select, Button{
-    justifyContent: space-around; 
-} */
+.nav select, .nav button {
+    cursor: pointer;
+    border-radius: 10px;
+    background-color: #ce8f55;
+    color: white;
+    border: 1px solid black;
+}
 
-//background: "#103074"
+/*background: "#103074"*/
