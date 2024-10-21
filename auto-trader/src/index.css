@@ -9,11 +9,11 @@ body {
 
 .nav {
     width: 300px;
-    height:40px;
+    height: 40px;
     margin: auto;
     display: flex;
+    padding: 15px;
     justify-content: space-between;
-
 }
 
 .nav select, .nav button {
@@ -21,7 +21,11 @@ body {
     border-radius: 10px;
     background-color: #ce8f55;
     color: white;
+    
     border: 1px solid black;
+}
+.card {
+   width: auto;
 }
 
 /*background: "#103074"*/

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Card } from 'react-bootstrap';
 
 export default function Navbar() {
-    const [selectedValue, setSelectedValue] = useState('FNGU'); // Default value
+    const [selectedValue, setSelectedValue] = useState('FNGU');
     const [data, setData] = useState(null);
 
     const handleSelectChange = (event) => {
@@ -21,7 +21,8 @@ export default function Navbar() {
             });
       
             const json = await response.json();
-            setData(json);
+            setData(`data:image/png;base64,${json.image}`);
+            //setData(json);
           } catch (error) {
             console.error('Error fetching data:', error);
           }
@@ -35,12 +36,19 @@ export default function Navbar() {
         }, [data]);
 
     return (
+        <div>
         <div className="nav">
             <select value={selectedValue} onChange={handleSelectChange}>
                 <option value="FNGU">FNGU</option>
                 <option value="FNGD">FNGD</option>
             </select>
+        
             <Button onClick={() => Download()}>Download</Button>
+            </div>
+            <Card>
+                <Card.Img src={data} />
+            </Card>
+        
         </div>
     );
 }
