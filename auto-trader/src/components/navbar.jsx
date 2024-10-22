@@ -1,67 +1,58 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card } from 'react-bootstrap';
+// backtesting v1 
+
+import React, { useState } from 'react';
+import { Button } from 'react-bootstrap';
 import HistoryGraph from './HistoryGraph';
-import SMA from './SMA';
+import SMACrossover from './SMACrossover';
 
 export default function Navbar() {
-    const [selectedValue, setSelectedValue] = useState('FNGU');
-    const [data, setData] = useState(null);
+    const [selectedValue, setSelectedValue] = useState('FNGU');  // Default symbol
     const [downloaded, setDownloaded] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
-    const [showSMA, setShowSMA] = useState(false);
+    const [showSMACrossover, setShowSMACrossover] = useState(false);
+
     const handleSelectChange = (event) => {
         setSelectedValue(event.target.value);
     };
 
     const Download = async () => {
-          setDownloaded(true);
-            console.log('Download');
-        };
+        setDownloaded(true);
+    };
 
-        const get_SMA = async () => {
-            setShowSMA(true);
-        }
+    const getSMACrossover = async () => {
+        setShowSMACrossover(true);
+        setShowHistory(false);
+    };
 
-        const get_history = async () => {
-            setShowHistory(true);
-        };
+    const getHistory = async () => {
+        setShowHistory(true);
+        setShowSMACrossover(false);
+    };
 
-        useEffect(() => {
-            if (data) {
-                console.log(data);
-            }
-        }, [data]);
-        if (downloaded) {
-            return (
-               <>
-            
-                
-            {(showHistory) ? <HistoryGraph value={selectedValue}/> : 
-            (showSMA) ? <SMA data={selectedValue}/> :
-
-            (
-            <div>
-            <Button onClick={() => get_history()}>Show Historical Graph</Button>
-            <Button onClick={() => get_SMA()}>Show SMA</Button>
+    return (
+        <div>
+            <div className="nav">
+                <select value={selectedValue} onChange={handleSelectChange}>
+                    <option value="FNGU">FNGU</option>
+                    <option value="FNGD">FNGD</option>
+                </select>
+                <Button onClick={Download}>Download</Button>
             </div>
-            )}
 
-            </>
-            
-            );
-        } else {
-            return (
-                <div>
-                    <div className="nav">
-                        <select value={selectedValue} onChange={handleSelectChange}>
-                            <option value="FNGU">FNGU</option>
-                            <option value="FNGD">FNGD</option>
-                        </select>
-                    
-                        <Button onClick={() => Download()}>Download</Button>
-                    </div>
-                
-                </div>
-            );
-        }
+            {downloaded && (
+                <>
+                    {showHistory ? (
+                        <HistoryGraph value={selectedValue} />
+                    ) : showSMACrossover ? (
+                        <SMACrossover symbol={selectedValue} /> 
+                    ) : (
+                        <div>
+                            <Button onClick={getHistory}>Show Historical Graph</Button>
+                            <Button onClick={getSMACrossover}>Show SMA Crossover</Button>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
 }

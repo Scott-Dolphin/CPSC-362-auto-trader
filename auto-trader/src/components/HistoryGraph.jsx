@@ -52,13 +52,31 @@ export default function HistoryGraph({value}) {
             console.error('Error fetching data:', error);
           }
           
-        };    
+        };   
 
         useEffect(() => {
             console.log(value);
             get_history();
             console.log(data);
         }, [data]);
+    
+    // // gpt code
+
+    // const get_history = async () => {
+    //     try {
+    //         const response = await fetch(`http://127.0.0.1:3000/${value}_data.json`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             }
+    //         });
+    
+    //         const json = await response.json();
+    //         setData(`data:image/png;base64,${json.image}`);
+    //     } catch (error) {
+    //         console.error('Error fetching data:', error);
+    //     }
+    // };
     
     return (
         <div>
