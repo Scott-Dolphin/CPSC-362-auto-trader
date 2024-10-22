@@ -6,9 +6,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 export default function HistoryGraph({value}) {
 
-    const [startDate, setStartDate] = useState("2021-01-01");
+    const [startDate, setStartDate] = useState(new Date('2021-01-01'));
     const [endDate, setEndDate] = useState(null);
     const [data, setData] = useState(null);
+    const [f, setF] = useState(true);
+    const [fileContent, setFileContent] = useState(null);
 
     const handleStartDateChange = (date) => {
         setStartDate(date);
@@ -18,17 +20,16 @@ export default function HistoryGraph({value}) {
         setEndDate(date);
     };
 
-    const handleSubmit = () => {
-        // Handle the date range submission
-        setStartDate(format(startDate, 'yyyy-MM-dd'));
-        setEndDate(format(endDate, 'yyyy-MM-dd'));
-
-        console.log('Start Date:', startDate);
-        if(endDate != null) {
-        console.log('End Date:', endDate);
-        }
-        // You can make an API call here with the selected date range
-        get_history();
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const json = JSON.parse(e.target.result);
+            console.log('Uploaded JSON:', json);
+            setFileContent(json);
+            setF(false);
+        };
+        reader.readAsText(file);
     };
     
     const get_history = async () => {
@@ -42,7 +43,10 @@ export default function HistoryGraph({value}) {
                     'Content-Type': 'application/json',
                 },
                 mode: 'cors',
-                body: JSON.stringify({ symbol: value, start: startDate, end: endDate }),
+                body: JSON.stringify({ symbol: value,
+                    start: format(startDate, 'yyyy-MM-dd'),
+                    end: endDate ? format(endDate, 'yyyy-MM-dd') : null,
+                 }),
             });
       
             const json = await response.json();
@@ -52,14 +56,41 @@ export default function HistoryGraph({value}) {
             console.error('Error fetching data:', error);
           }
           
-        };    
+        };
+        
+        const get_first_history = async () => {
+            
+            console.log('showing history');
+    
+            try {
+                const response = await fetch('http://127.0.0.1:3000/api/stock/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors',
+                    body: JSON.stringify({ symbol: value, file: fileContent }),
+                });
+          
+                const json = await response.json();
+                setData(`data:image/png;base64,${json.image}`);
+                //setData(json);
+              } catch (error) {
+                console.error('Error fetching data:', error);
+              }
+              
+        };        
 
         useEffect(() => {
-            console.log(value);
-            get_history();
-            console.log(data);
-        }, [data]);
-    
+            get_first_history();
+        }, [fileContent]);
+    if(f) {
+        return (
+            <div>
+                <input type="file" accept=".json" onChange={handleFileUpload}/>
+            </div>
+        );
+    }
     return (
         <div>
             <Card>
@@ -83,7 +114,7 @@ export default function HistoryGraph({value}) {
                     minDate={startDate}
                     dateFormat="yyyy-MM-dd"
                 />
-                <Button onClick={handleSubmit}>Change Range</Button>
+                <Button onClick={get_history}>Change Range</Button>
             </div>
             
         </div>

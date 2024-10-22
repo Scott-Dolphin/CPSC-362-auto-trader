@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yfinance as yf
-
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
@@ -12,6 +11,7 @@ from matplotlib.dates import DateFormatter
 from matplotlib.ticker import MaxNLocator
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Set maximum request size to 16 MB
 
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -38,6 +38,7 @@ def plot(history_dict, symbol):
         'High': highs,
         'Low': lows
     })
+    
 
     # Create a plot
     plt.figure()
@@ -67,6 +68,12 @@ def get_stock_data():
     try:
         data = request.json
         symbol = data.get('symbol')
+        if data.get('file') is not None:
+            ETF = yf.Ticker(symbol)
+            data = ETF.history(period='1y', actions=False)
+            data.index = data.index.strftime('%Y-%m-%d')
+            history_dict = data.to_dict(orient='index')
+            return plot(history_dict=history_dict, symbol=symbol)
         start_date = data.get('start')
         end_date = data.get('end')
         print(start_date)
@@ -74,25 +81,22 @@ def get_stock_data():
         ETF = yf.Ticker(symbol)
 
         if(end_date == "none"):
-            data = ETF.history(start=start_date, actions=False)
+            df = ETF.history(start=start_date, actions=False)
         else:
-            data = ETF.history(start=start_date, end=end_date, actions=False)
+            df = ETF.history(start=start_date, end=end_date, actions=False)
 
         
-        data.index = data.index.strftime('%Y-%m-%d')
-        history_dict = data.to_dict(orient='index')
+        df.index = df.index.strftime('%Y-%m-%d')
+        history_dict = df.to_dict(orient='index')
         return plot(history_dict=history_dict, symbol=symbol)
     except Exception as e:
+        print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/sma', methods=['POST'])
 def get_sma():
-
-
     try:
-
-
         data = request.json
         symbol = data.get('symbol')
         ETF = yf.Ticker(symbol)
@@ -112,14 +116,21 @@ def get_sma():
 
 
 # Example endpoint to return some data
-@app.route('/api/data', methods=['GET'])
-def get_data():
-    return jsonify({'message': 'Hello from Python!'})
+@app.route('/api/stock/<symbol>', methods=['POST'])
+def get_download(symbol):
+    data = request.json
+    time = data.get('period')
+    ETF = yf.Ticker(symbol)
+    data = ETF.history(period=time, actions=False)
+    data.index = data.index.strftime('%Y-%m-%d')
+    history_dict = data.to_dict(orient='index')
+
+    return jsonify(history_dict)
 
 # Example endpoint that accepts POST requests
 @app.route('/api/echo', methods=['POST'])
 def echo():
-    data = request.json  # Get JSON data from request
+    data = request.json
     return jsonify({'you_sent': data})
 
 

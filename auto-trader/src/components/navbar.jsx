@@ -12,9 +12,43 @@ export default function Navbar() {
     const handleSelectChange = (event) => {
         setSelectedValue(event.target.value);
     };
+    const downloadFile = () => {
+        if(data==null) { return; }
 
+        const fileName = 'data.json';
+        const json = JSON.stringify(data);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
     const Download = async () => {
-          setDownloaded(true);
+        try {
+            const response = await fetch(`http://127.0.0.1:3000/api/stock/${selectedValue}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                mode: 'cors',
+                body: JSON.stringify({ period : '1y' }),
+            });
+      
+            const json = await response.json();
+            setData(json);
+            //setData(json);
+            
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }  
+        
+        setDownloaded(true);
+
             console.log('Download');
         };
 
@@ -28,6 +62,7 @@ export default function Navbar() {
 
         useEffect(() => {
             if (data) {
+                downloadFile();
                 console.log(data);
             }
         }, [data]);
