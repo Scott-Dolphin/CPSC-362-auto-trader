@@ -9,12 +9,17 @@ export default function Navbar() {
     const [downloaded, setDownloaded] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [showSMA, setShowSMA] = useState(false);
+
+    // Handle select change
     const handleSelectChange = (event) => {
         setSelectedValue(event.target.value);
     };
+
+    // Download file
     const downloadFile = () => {
         if(data==null) { return; }
 
+        
         const fileName = 'data.json';
         const json = JSON.stringify(data);
         const blob = new Blob([json], { type: 'application/json' });
@@ -28,29 +33,30 @@ export default function Navbar() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     };
+
+    // Fetch data from the server
     const Download = async () => {
         try {
+            console.log('Downloading data for:', selectedValue);
             const response = await fetch(`http://127.0.0.1:3000/api/stock/${selectedValue}`, {
-                method: 'POST',
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                mode: 'cors',
-                body: JSON.stringify({ period : '1y' }),
+                mode: 'cors'
             });
       
             const json = await response.json();
             setData(json);
-            //setData(json);
             
-          } catch (error) {
+        } catch (error) {
             console.error('Error fetching data:', error);
-          }  
+        }  
         
         setDownloaded(true);
 
-            console.log('Download');
-        };
+        console.log('Download');
+    };
 
         const get_SMA = async () => {
             setShowSMA(true);
@@ -66,6 +72,7 @@ export default function Navbar() {
                 console.log(data);
             }
         }, [data]);
+
         if (downloaded) {
             return (
                <>

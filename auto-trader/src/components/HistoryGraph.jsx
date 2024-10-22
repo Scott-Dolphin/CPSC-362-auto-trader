@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
-import { format } from 'date-fns';
+import { format, set } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default function HistoryGraph({value}) {
@@ -12,14 +12,17 @@ export default function HistoryGraph({value}) {
     const [f, setF] = useState(true);
     const [fileContent, setFileContent] = useState(null);
 
+    // Handle start date change
     const handleStartDateChange = (date) => {
         setStartDate(date);
     };
 
+    // Handle end date change
     const handleEndDateChange = (date) => {
         setEndDate(date);
     };
 
+    // Handle file upload and read JSON content
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
@@ -30,10 +33,11 @@ export default function HistoryGraph({value}) {
             setF(false);
         };
         reader.readAsText(file);
+        fetch_first_history();
     };
-    
-    const get_history = async () => {
-            
+
+    // Fetch historical data based on selected date range
+    const fetch_history = async () => {
         console.log('showing history');
 
         try {
@@ -52,18 +56,18 @@ export default function HistoryGraph({value}) {
             const json = await response.json();
             setData(`data:image/png;base64,${json.image}`);
             //setData(json);
-          } catch (error) {
+        } catch (error) {
             console.error('Error fetching data:', error);
-          }
+        }
           
-        };
+    };
         
-        const get_first_history = async () => {
+        const fetch_first_history = async () => {
             
             console.log('showing history');
     
             try {
-                const response = await fetch('http://127.0.0.1:3000/api/stock/', {
+                const response = await fetch('http://127.0.0.1:3000/api/stock/json/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -71,19 +75,21 @@ export default function HistoryGraph({value}) {
                     mode: 'cors',
                     body: JSON.stringify({ symbol: value, file: fileContent }),
                 });
-          
+                
                 const json = await response.json();
                 setData(`data:image/png;base64,${json.image}`);
-                //setData(json);
-              } catch (error) {
+                console.log('Data:', data);
+            } catch (error) {
                 console.error('Error fetching data:', error);
-              }
-              
+            }
         };        
 
         useEffect(() => {
-            get_first_history();
+            if (fileContent) {
+                fetch_first_history();
+            }
         }, [fileContent]);
+
     if(f) {
         return (
             <div>
@@ -114,7 +120,7 @@ export default function HistoryGraph({value}) {
                     minDate={startDate}
                     dateFormat="yyyy-MM-dd"
                 />
-                <Button onClick={get_history}>Change Range</Button>
+                <Button onClick={fetch_history}>Change Range</Button>
             </div>
             
         </div>

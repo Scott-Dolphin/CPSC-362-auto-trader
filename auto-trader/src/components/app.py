@@ -6,8 +6,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import base64
-from io import BytesIO
-from matplotlib.dates import DateFormatter
+from io import BytesIO, StringIO
+import json
 from matplotlib.ticker import MaxNLocator
 
 app = Flask(__name__)
@@ -22,9 +22,9 @@ def plot(history_dict, symbol):
     closes = []
     highs = []
     lows = []
+
     for date, data in history_dict.items():
         if 'Open' in data:
-            
             dates.append(date)
             opens.append(data['Open'])
             closes.append(data['Close'])
@@ -48,8 +48,6 @@ def plot(history_dict, symbol):
     plt.plot(df['x'], df['Low'], label='Low')
     plt.title(f"{symbol} History")
     plt.legend()
-
-    #plt.gca().xaxis.set_major_formatter(DateFormatter('%Y-%m'))
     plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=10))  # Limit the number of x-axis labels
     plt.xticks(rotation=45)  # Rotate date labels
     plt.tight_layout()  
@@ -62,18 +60,26 @@ def plot(history_dict, symbol):
     plt.close()
     return jsonify({'image': img_base64})
 
+# endpoint that takes a json file or time range
+
+@app.route('/api/stock/json/', methods=['POST'])
+def plot_json():
+    try:
+        data = request.json
+        symbol = data.get('symbol')
+        file_content = data.get('file')
+        return plot(history_dict=file_content, symbol=symbol)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/stock/', methods=['POST'])
 def get_stock_data():
     
     try:
         data = request.json
         symbol = data.get('symbol')
-        if data.get('file') is not None:
-            ETF = yf.Ticker(symbol)
-            data = ETF.history(period='1y', actions=False)
-            data.index = data.index.strftime('%Y-%m-%d')
-            history_dict = data.to_dict(orient='index')
-            return plot(history_dict=history_dict, symbol=symbol)
         start_date = data.get('start')
         end_date = data.get('end')
         print(start_date)
@@ -93,7 +99,7 @@ def get_stock_data():
         print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
 
-
+# sma endpoint
 @app.route('/api/sma', methods=['POST'])
 def get_sma():
     try:
@@ -115,13 +121,11 @@ def get_sma():
 
 
 
-# Example endpoint to return some data
-@app.route('/api/stock/<symbol>', methods=['POST'])
+# endpoint that 
+@app.route('/api/stock/<symbol>', methods=['GET'])
 def get_download(symbol):
-    data = request.json
-    time = data.get('period')
     ETF = yf.Ticker(symbol)
-    data = ETF.history(period=time, actions=False)
+    data = ETF.history(start='2021-01-01', actions=False)
     data.index = data.index.strftime('%Y-%m-%d')
     history_dict = data.to_dict(orient='index')
 
