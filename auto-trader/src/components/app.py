@@ -1,45 +1,37 @@
+import os
+import json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import yfinance as yf
-
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import base64
 from io import BytesIO
-from matplotlib.dates import DateFormatter
+import base64
 from matplotlib.ticker import MaxNLocator
+from datetime import datetime
 
 app = Flask(__name__)
-
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
+# Function to create a plot
 def plot(history_dict, symbol):
-    # Sample data
     dates = []
     opens = []
     closes = []
     highs = []
     lows = []
+
     for date, data in history_dict.items():
-        if 'Open' in data:
-            
-            dates.append(date)
-            opens.append(data['Open'])
-            closes.append(data['Close'])
-            highs.append(data['High'])
-            lows.append(data['Low'])
+        dates.append(date)
+        opens.append(data['Open'])
+        closes.append(data['Close'])
+        highs.append(data['High'])
+        lows.append(data['Low'])
 
-    df = pd.DataFrame({
-        'x': dates,
-        'Open': opens,
-        'Close': closes,
-        'High': highs,
-        'Low': lows
-    })
+    df = pd.DataFrame({'x': dates, 'Open': opens, 'Close': closes, 'High': highs, 'Low': lows})
 
-    # Create a plot
     plt.figure()
     plt.plot(df['x'], df['Open'], label='Open')
     plt.plot(df['x'], df['Close'], label='Close')
@@ -47,72 +39,63 @@ def plot(history_dict, symbol):
     plt.plot(df['x'], df['Low'], label='Low')
     plt.title(f"{symbol} History")
     plt.legend()
+    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=10))
+    plt.xticks(rotation=45)
+    plt.tight_layout()
 
-    #plt.gca().xaxis.set_major_formatter(DateFormatter('%Y-%m'))
-    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=10))  # Limit the number of x-axis labels
-    plt.xticks(rotation=45)  # Rotate date labels
-    plt.tight_layout()  
-
-    # Save to a BytesIO object and encode it
     buf = BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
+
     return jsonify({'image': img_base64})
+
+# Helper function to check and load JSON data
+def load_data_from_json(json_file):
+    if os.path.exists(json_file):
+        with open(json_file, 'r') as file:
+            return json.load(file)
+    return None
+
+# Helper function to save data to a JSON file
+def save_data_to_json(json_file, data):
+    with open(json_file, 'w') as file:
+        json.dump(data, file, indent=4)
 
 @app.route('/api/stock/', methods=['POST'])
 def get_stock_data():
-    
     try:
         data = request.json
         symbol = data.get('symbol')
         start_date = data.get('start')
-        end_date = data.get('end')
-        print(start_date)
-        print(end_date)
-        ETF = yf.Ticker(symbol)
+        end_date = data.get('end') or datetime.today().strftime('%Y-%m-%d')
 
-        if(end_date == "none"):
-            data = ETF.history(start=start_date, actions=False)
-        else:
-            data = ETF.history(start=start_date, end=end_date, actions=False)
+        # Define a single JSON file for each symbol to store all its data
+        json_file = f"{symbol}_full_data.json"
 
-        
-        data.index = data.index.strftime('%Y-%m-%d')
-        history_dict = data.to_dict(orient='index')
-        return plot(history_dict=history_dict, symbol=symbol)
+        # Check if JSON file already exists
+        stock_data = load_data_from_json(json_file)
+        if stock_data is None:
+            # Fetch full data for the symbol from 01/01/2021 to today
+            ETF = yf.Ticker(symbol)
+            fetched_data = ETF.history(start='2021-01-01', actions=False)
+            fetched_data.index = fetched_data.index.strftime('%Y-%m-%d')
+            stock_data = fetched_data.to_dict(orient='index')
+
+            # Save the full data to a JSON file for future use
+            save_data_to_json(json_file, stock_data)
+
+        # Filter the loaded data according to the requested date range
+        filtered_data = {date: data for date, data in stock_data.items() if start_date <= date <= end_date}
+
+        # Plot the filtered data
+        return plot(filtered_data, symbol)
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-
-
-# @app.route('/api/sma', methods=['POST'])
-# def get_sma():
-
-
-#     try:
-
-
-#         data = request.json
-#         symbol = data.get('symbol')
-#         ETF = yf.Ticker(symbol)
-#         data = ETF.history(period='1y', actions=False)
-#         data.index = data.index.strftime('%Y-%m-%d')
-#         history_dict = data.to_dict(orient='index')
-
-#         print(history_dict)
-
-
-
-#         return jsonify({'sma': 'data'})
-    
-
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-# gpt code v1 sma 
+# added json file handling for sma calculation
 @app.route('/api/sma', methods=['POST'])
 def get_sma():
     try:
@@ -124,23 +107,34 @@ def get_sma():
         print("Received symbol:", symbol)
         print("Received period:", period)
 
-        # Fetch stock data from Yahoo Finance
-        ETF = yf.Ticker(symbol)
-        stock_data = ETF.history(period='1y', actions=False)
+        # Define the JSON file where stock data is stored
+        json_file = f"{symbol}_full_data.json"
 
-        # Log the stock data for debugging
-        print(stock_data.head())  # Log first few rows of the data
+        # Check if the JSON file exists, load data from it
+        stock_data = load_data_from_json(json_file)
+
+        if stock_data is None:
+            # Fetch stock data from Yahoo Finance if not in the JSON file
+            ETF = yf.Ticker(symbol)
+            stock_data = ETF.history(period='1y', actions=False).to_dict(orient='index')
+            save_data_to_json(json_file, stock_data)
+
+        # Convert the dictionary back to a pandas DataFrame for processing
+        stock_df = pd.DataFrame.from_dict(stock_data, orient='index')
+
+        # Ensure the data is sorted by date in case it's not
+        stock_df = stock_df.sort_index()
 
         # Check if the 'Close' column exists
-        if 'Close' not in stock_data.columns:
+        if 'Close' not in stock_df.columns:
             raise ValueError("The 'Close' column is missing from the stock data.")
 
         # Calculate SMA
-        stock_data['SMA'] = stock_data['Close'].rolling(window=period).mean()
+        stock_df['SMA'] = stock_df['Close'].rolling(window=period).mean()
 
         # Format data for JSON response
-        stock_data.index = stock_data.index.strftime('%Y-%m-%d')
-        sma_dict = stock_data[['SMA']].dropna().to_dict(orient='index')  # Drop rows with NaN SMA
+        stock_df.index = stock_df.index.strftime('%Y-%m-%d')
+        sma_dict = stock_df[['SMA']].dropna().to_dict(orient='index')  # Drop rows with NaN SMA
 
         # Return calculated SMA as JSON
         return jsonify({'sma': sma_dict})
@@ -150,7 +144,8 @@ def get_sma():
         print("Error in /api/sma:", str(e))
         return jsonify({'error': str(e)}), 500
 
-# gpt code crossover
+
+# sma crossover
 @app.route('/api/sma_crossover', methods=['POST'])
 def sma_crossover():
     try:
@@ -184,7 +179,7 @@ def sma_crossover():
         print("Error in SMA Crossover:", str(e))
         return jsonify({'error': str(e)}), 500
 
-# gpt code backtest
+# backtest
 @app.route('/api/backtest', methods=['POST'])
 def backtest():
     try:
@@ -214,57 +209,16 @@ def backtest():
                 shares = 0  # Reset shares after selling
 
         total_gain = balance - initial_balance
-        annual_return = (total_gain / initial_balance) * 100  # Simplified annual return
+        annual_return = (total_gain / initial_balance) * 100  # annual return
 
         return jsonify({'log': log, 'total_gain': total_gain, 'annual_return': annual_return})
 
     except Exception as e:
         print("Error in backtesting:", str(e))
         return jsonify({'error': str(e)}), 500
+    
 
-# gpt code log v1 works
-# import csv
-
-# @app.route('/api/backtest_log', methods=['POST'])
-# def backtest_log():
-#     try:
-#         data = request.json
-#         signals = data.get('signals')
-#         log_filename = 'trade_log.csv'
-
-#         # Open the CSV file and write the log
-#         with open(log_filename, mode='w', newline='') as file:
-#             writer = csv.writer(file)
-#             writer.writerow(['Date', 'Action', 'Price', 'Shares', 'Balance', 'Gain/Loss'])
-
-#             initial_balance = 100000
-#             balance = initial_balance
-#             shares = 0
-
-#             for signal in signals:
-#                 date = signal['date']
-#                 price = signal['price']
-#                 action = signal['action']
-
-#                 if action == 'buy':
-#                     shares = balance // price
-#                     balance -= shares * price
-#                     writer.writerow([date, action, price, shares, balance, ''])
-
-#                 elif action == 'sell' and shares > 0:
-#                     transaction_amount = shares * price
-#                     gain = transaction_amount - (shares * signal['price'])
-#                     balance += transaction_amount
-#                     writer.writerow([date, action, price, shares, balance, gain])
-#                     shares = 0
-
-#         return jsonify({'message': f'Trade log saved as {log_filename}'})
-
-#     except Exception as e:
-#         print("Error writing to CSV:", str(e))
-#         return jsonify({'error': str(e)}), 500
-
-# gpt code log v2
+# backtest log 
 import csv
 from datetime import datetime
 
@@ -354,13 +308,6 @@ def backtest_log():
     except Exception as e:
         print("Error writing to CSV:", str(e))
         return jsonify({'error': str(e)}), 500
-
-
-
-
-
-
-
 
 
 # Example endpoint to return some data
