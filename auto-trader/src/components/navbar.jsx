@@ -1,32 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card } from 'react-bootstrap';
+import HistoryGraph from './HistoryGraph';
+import SMA from './SMA';
 
 export default function Navbar() {
     const [selectedValue, setSelectedValue] = useState('FNGU');
     const [data, setData] = useState(null);
-
+    const [downloaded, setDownloaded] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
+    const [showSMA, setShowSMA] = useState(false);
     const handleSelectChange = (event) => {
         setSelectedValue(event.target.value);
     };
 
     const Download = async () => {
-    
-        try {
-            const response = await fetch(`http://192.168.1.52:5000/api/stock/${selectedValue}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              mode: 'cors',
-            });
-      
-            const json = await response.json();
-            setData(`data:image/png;base64,${json.image}`);
-            //setData(json);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
+          setDownloaded(true);
+            console.log('Download');
+        };
 
+        const get_SMA = async () => {
+            setShowSMA(true);
+        }
+
+        const get_history = async () => {
+            setShowHistory(true);
         };
 
         useEffect(() => {
@@ -34,21 +31,37 @@ export default function Navbar() {
                 console.log(data);
             }
         }, [data]);
+        if (downloaded) {
+            return (
+               <>
+            
+                
+            {(showHistory) ? <HistoryGraph value={selectedValue}/> : 
+            (showSMA) ? <SMA data={selectedValue}/> :
 
-    return (
-        <div>
-        <div className="nav">
-            <select value={selectedValue} onChange={handleSelectChange}>
-                <option value="FNGU">FNGU</option>
-                <option value="FNGD">FNGD</option>
-            </select>
-        
-            <Button onClick={() => Download()}>Download</Button>
+            (
+            <div>
+            <Button onClick={() => get_history()}>Show Historical Graph</Button>
+            <Button onClick={() => get_SMA()}>Show SMA</Button>
             </div>
-            <Card>
-                <Card.Img src={data} />
-            </Card>
-        
-        </div>
-    );
+            )}
+
+            </>
+            
+            );
+        } else {
+            return (
+                <div>
+                    <div className="nav">
+                        <select value={selectedValue} onChange={handleSelectChange}>
+                            <option value="FNGU">FNGU</option>
+                            <option value="FNGD">FNGD</option>
+                        </select>
+                    
+                        <Button onClick={() => Download()}>Download</Button>
+                    </div>
+                
+                </div>
+            );
+        }
 }
