@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import HistoryGraph from './HistoryGraph';
 import SMA from './SMA';
+import SMACrossover from './SMACrossover';
 
 export default function Navbar() {
     const [selectedValue, setSelectedValue] = useState('FNGU');
@@ -79,7 +80,7 @@ export default function Navbar() {
             
                 
             {(showHistory) ? <HistoryGraph value={selectedValue}/> : 
-            (showSMA) ? <SMA data={selectedValue}/> :
+            (showSMA) ? <SMACrossover symbol={selectedValue}/> :
 
             (
             <div>

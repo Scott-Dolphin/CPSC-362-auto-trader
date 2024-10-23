@@ -29,3 +29,85 @@ body {
 }
 
 /*background: "#103074"*/
+
+.sma-container {
+    padding: 20px;
+    background-color: #333;  /* Darker background for better contrast */
+    border-radius: 10px;
+    max-width: 700px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: white; /* Make text easier to read */
+}
+
+.period-label {
+    font-size: 18px;
+    margin-right: 10px;
+    margin-bottom: 10px;  /* Add margin to space out the elements */
+}
+
+.period-input {
+    width: 70px;
+    padding: 5px;
+    border: 2px solid #ce8f55;
+    border-radius: 5px;
+    margin-right: 15px;
+}
+
+.recalculate-btn, .backtest-btn, .log-btn {
+    background-color: #ce8f55;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;  /* Add space between the buttons */
+    margin-right: 10px;
+}
+
+.recalculate-btn:hover, .backtest-btn:hover, .log-btn:hover {
+    background-color: #b67a45;
+}
+
+.sma-list, .trade-log {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: scroll;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: #222; /* Darker background for list items */
+    border-radius: 5px;
+}
+
+.sma-item, .trade-item {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+    font-size: 16px;
+    color: #eee;
+}
+
+.sma-item:last-child, .trade-item:last-child {
+    border-bottom: none;
+}
+
+.sma-item strong, .trade-item strong {
+    color: #ce8f55;
+}
+
+h3, h4 {
+    color: #fff;
+}
+
+button {
+    margin-bottom: 10px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li::before {
+    content: "• ";
+    color: #ce8f55; /* Bullet color */
+}
