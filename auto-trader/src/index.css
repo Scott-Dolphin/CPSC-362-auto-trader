@@ -28,6 +28,16 @@ body {
    width: auto;
 }
 
+button {
+    border: none;
+    background-color: #ce8f55;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+
 /*background: "#103074"*/
 
 .sma-container {

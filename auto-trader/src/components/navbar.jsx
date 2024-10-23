@@ -20,7 +20,6 @@ export default function Navbar() {
     const downloadFile = () => {
         if(data==null) { return; }
 
-        
         const fileName = 'data.json';
         const json = JSON.stringify(data);
         const blob = new Blob([json], { type: 'application/json' });
