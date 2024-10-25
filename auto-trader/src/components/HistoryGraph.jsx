@@ -4,7 +4,7 @@ import DatePicker from 'react-datepicker';
 import { format, set } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 
-export default function HistoryGraph({value}) {
+export default function HistoryGraph({symbol}) {
 
     const [startDate, setStartDate] = useState(new Date('2021-01-01'));
     const [endDate, setEndDate] = useState(null);
@@ -47,7 +47,7 @@ export default function HistoryGraph({value}) {
                     'Content-Type': 'application/json',
                 },
                 mode: 'cors',
-                body: JSON.stringify({ symbol: value,
+                body: JSON.stringify({ symbol: symbol,
                     start: format(startDate, 'yyyy-MM-dd'),
                     end: endDate ? format(endDate, 'yyyy-MM-dd') : null,
                  }),
@@ -73,7 +73,7 @@ export default function HistoryGraph({value}) {
                         'Content-Type': 'application/json',
                     },
                     mode: 'cors',
-                    body: JSON.stringify({ symbol: value, file: fileContent }),
+                    body: JSON.stringify({ symbol: symbol, file: fileContent }),
                 });
                 
                 const json = await response.json();

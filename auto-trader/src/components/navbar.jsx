@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import HistoryGraph from './HistoryGraph';
-import SMA from './SMA';
-import SMACrossover from './SMACrossover';
+import StrategyDisplay from './StrategyDisplay';
 
 export default function Navbar() {
     const [selectedValue, setSelectedValue] = useState('FNGU');
     const [data, setData] = useState(null);
     const [downloaded, setDownloaded] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
-    const [showSMA, setShowSMA] = useState(false);
+    const [showStrat, setShowStrat] = useState(false);
 
     // Handle select change
     const handleSelectChange = (event) => {
@@ -58,8 +57,8 @@ export default function Navbar() {
         console.log('Download');
     };
 
-        const get_SMA = async () => {
-            setShowSMA(true);
+        const get_Strat = async () => {
+            setShowStrat(true);
         }
 
         const get_history = async () => {
@@ -78,13 +77,13 @@ export default function Navbar() {
                <>
             
                 
-            {(showHistory) ? <HistoryGraph value={selectedValue}/> : 
-            (showSMA) ? <SMACrossover symbol={selectedValue}/> :
+            {(showHistory) ? <HistoryGraph symbol={selectedValue}/> : 
+            (showStrat) ? <StrategyDisplay symbol={selectedValue}/> :
 
             (
             <div>
             <Button onClick={() => get_history()}>Show Historical Graph</Button>
-            <Button onClick={() => get_SMA()}>Show SMA</Button>
+            <Button onClick={() => get_Strat()}>Show Strategies</Button>
             </div>
             )}
 
