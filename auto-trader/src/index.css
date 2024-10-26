@@ -121,3 +121,86 @@ ul li::before {
     content: "• ";
     color: #ce8f55; /* Bullet color */
 }
+
+/* css for macd and bb */
+.strategy-container {
+    padding: 20px;
+    background-color: #333;
+    border-radius: 10px;
+    max-width: 700px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    color: white;
+    text-align: center;
+}
+
+h3, h4 {
+    color: #fff;
+}
+
+button {
+    background-color: #ce8f55;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+button:hover {
+    background-color: #b67a45;
+}
+
+.signal-list, .trade-log {
+    max-height: 300px;
+    overflow-y: scroll;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: #222;
+    border-radius: 5px;
+}
+
+.signal-item, .trade-item {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+    font-size: 16px;
+    color: #eee;
+}
+
+.signal-item:last-child, .trade-item:last-child {
+    border-bottom: none;
+}
+
+button.calculate-btn, button.backtest-btn, button.log-btn {
+    margin: 10px 0;
+}
+
+button.calculate-btn:hover, button.backtest-btn:hover, button.log-btn:hover {
+    background-color: #b67a45;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;  /* Center the buttons */
+    margin-bottom: 20px;  /* Add margin below the button group */
+}
+
+button.calculate-btn {
+    margin-right: 20px;  /* Space between Calculate and Backtest */
+}
+
+button.backtest-btn {
+    margin-right: 20px;  /* Space between Backtest and Log to CSV */
+}
+
+button.log-btn {
+    margin-right: 0;  /* Ensure no additional margin to the right */
+}
+
+.period-input {
+    width: 60px;
+    padding: 5px;
+    margin-left: 10px;
+}
