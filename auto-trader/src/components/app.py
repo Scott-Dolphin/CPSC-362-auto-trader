@@ -92,14 +92,11 @@ def plot_json():
 
 @app.route('/api/stock/', methods=['POST'])
 def get_stock_data():
-    
-    try:
+    try: 
         data = request.json
         symbol = data.get('symbol')
         start_date = data.get('start')
         end_date = data.get('end')
-        print(start_date)
-        print(end_date)
         ETF = yf.Ticker(symbol)
 
         if(end_date == "none"):
@@ -480,8 +477,6 @@ def macd_backtest():
 def echo():
     data = request.json
     return jsonify({'you_sent': data})
-
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000)
