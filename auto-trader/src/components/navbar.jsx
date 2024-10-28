@@ -15,6 +15,14 @@ export default function Navbar() {
         setSelectedValue(event.target.value);
     };
 
+    const get_Strat = async () => {
+        setShowStrat(true);
+    }
+
+    const get_history = async () => {
+        setShowHistory(true);
+    };
+
     // Download file
     const downloadFile = () => {
         if(data==null) { return; }
@@ -47,23 +55,12 @@ export default function Navbar() {
       
             const json = await response.json();
             setData(json);
-            
+            setDownloaded(true);
+            console.log('Download');
         } catch (error) {
             console.error('Error fetching data:', error);
         }  
-        
-        setDownloaded(true);
-
-        console.log('Download');
     };
-
-        const get_Strat = async () => {
-            setShowStrat(true);
-        }
-
-        const get_history = async () => {
-            setShowHistory(true);
-        };
 
         useEffect(() => {
             if (data) {
