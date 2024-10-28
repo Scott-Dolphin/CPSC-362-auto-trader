@@ -13,7 +13,7 @@ export default function SMACrossover({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/sma_crossover', {
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/sma_crossover', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export default function SMACrossover({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/backtest', {
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ export default function SMACrossover({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/backtest_log', {
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest_log', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

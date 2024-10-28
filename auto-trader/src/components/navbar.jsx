@@ -37,20 +37,26 @@ export default function Navbar() {
     const Download = async () => {
         try {
             console.log('Downloading data for:', selectedValue);
-            const response = await fetch(`ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/${selectedValue}`, { // fixme: syntax error on downlaod
+            const response = await fetch(`http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/${selectedValue}`, { // fixme: syntax error on downlaod
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 mode: 'cors'
             });
+            if (!response.ok) {
+                // Handle HTTP errors
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
       
             const json = await response.json();
             setData(json);
             
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }  
+        } catch (err) {
+            // Handle fetch errors
+           
+            console.error('Error fetching data:', err.message);
+          }  
         
         setDownloaded(true);
 

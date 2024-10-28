@@ -13,7 +13,7 @@ export default function BB({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/bollinger_bands', {
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/bollinger_bands', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export default function BB({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/backtest', {
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default function BB({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/backtest_log', {
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/backtest_log', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
