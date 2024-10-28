@@ -37,7 +37,7 @@ export default function Navbar() {
     const Download = async () => {
         try {
             console.log('Downloading data for:', selectedValue);
-            const response = await fetch(`http://127.0.0.1:3000/api/stock/${selectedValue}`, {
+            const response = await fetch(`ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/${selectedValue}`, { // fixme: syntax error on downlaod
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
