@@ -43,7 +43,6 @@ def plot(history_dict, symbol):
         'Low': lows
     })
     
-
     # Create a plot
     plt.figure()
     plt.plot(df['x'], df['Open'], label='Open')

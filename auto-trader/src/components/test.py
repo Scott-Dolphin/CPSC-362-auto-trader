@@ -40,7 +40,7 @@ class TestFNGUFunctions(unittest.TestCase):
         self.assertIn('2021-01-04', response_data)   
         self.assertIn('2024-10-10', response_data)   
         print('FNGU Tests Passed')
-    
+
         
 class TestFNGDFunctions(unittest.TestCase):
 

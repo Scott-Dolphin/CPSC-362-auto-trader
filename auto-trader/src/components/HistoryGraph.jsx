@@ -9,7 +9,7 @@ export default function HistoryGraph({symbol}) {
     const [startDate, setStartDate] = useState(new Date('2021-01-01'));
     const [endDate, setEndDate] = useState(null);
     const [data, setData] = useState(null);
-    const [f, setF] = useState(true);
+    const [fileDisplay, setFileDisplay] = useState(true);
     const [fileContent, setFileContent] = useState(null);
 
     // Handle start date change
@@ -30,7 +30,7 @@ export default function HistoryGraph({symbol}) {
             const json = JSON.parse(e.target.result);
             console.log('Uploaded JSON:', json);
             setFileContent(json);
-            setF(false);
+            setFileDisplay(false);
         };
         reader.readAsText(file);
         fetch_first_history();
@@ -90,40 +90,38 @@ export default function HistoryGraph({symbol}) {
             }
         }, [fileContent]);
 
-    if(f) {
         return (
-            <div>
-                <input type="file" accept=".json" onChange={handleFileUpload}/>
-            </div>
+            fileDisplay ? (
+                <div>
+                    <input type="file" accept=".json" onChange={handleFileUpload} />
+                </div>
+            ) : (
+                <div>
+                    <Card>
+                        <Card.Img src={data} />
+                    </Card>
+                    <div className="date-picker">
+                        <DatePicker
+                            selected={startDate}
+                            onChange={handleStartDateChange}
+                            selectsStart
+                            startDate={startDate}
+                            endDate={endDate}
+                            dateFormat="yyyy-MM-dd"
+                        />
+                        <DatePicker
+                            selected={endDate}
+                            onChange={handleEndDateChange}
+                            selectsEnd
+                            startDate={startDate}
+                            endDate={endDate}
+                            minDate={startDate}
+                            dateFormat="yyyy-MM-dd"
+                        />
+                        <Button onClick={fetch_history}>Change Range</Button>
+                    </div>
+                </div>
+            )
         );
-    }
-    return (
-        <div>
-            <Card>
-                <Card.Img src={data} />
-            </Card>
-            <div className="date-picker">
-                <DatePicker
-                    selected={startDate}
-                    onChange={handleStartDateChange}
-                    selectsStart
-                    startDate={startDate}
-                    endDate={endDate}
-                    dateFormat="yyyy-MM-dd"
-                />
-                <DatePicker
-                    selected={endDate}
-                    onChange={handleEndDateChange}
-                    selectsEnd
-                    startDate={startDate}
-                    endDate={endDate}
-                    minDate={startDate}
-                    dateFormat="yyyy-MM-dd"
-                />
-                <Button onClick={fetch_history}>Change Range</Button>
-            </div>
-            
-        </div>
-    );
 
 }
