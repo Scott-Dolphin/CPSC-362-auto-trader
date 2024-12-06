@@ -4,7 +4,7 @@ import DatePicker from 'react-datepicker';
 import { format, set } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
 
-export default function HistoryGraph({symbol}) {
+export default function HistoryGraph({symbol, setShowHistory}) {
 
     const [startDate, setStartDate] = useState(new Date('2021-01-01'));
     const [endDate, setEndDate] = useState(null);
@@ -22,19 +22,6 @@ export default function HistoryGraph({symbol}) {
         setEndDate(date);
     };
 
-    // Handle file upload and read JSON content
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const json = JSON.parse(e.target.result);
-            console.log('Uploaded JSON:', json);
-            setFileContent(json);
-            setFileDisplay(false);
-        };
-        reader.readAsText(file);
-        fetch_first_history();
-    };
 
     // Fetch historical data based on selected date range
     const fetch_history = async () => {
@@ -60,43 +47,15 @@ export default function HistoryGraph({symbol}) {
             console.error('Error fetching data:', error);
         }
           
-    };
-        
-        const fetch_first_history = async () => {
-            
-            console.log('showing history');
-    
-            try {
-                const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/json/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    mode: 'cors',
-                    body: JSON.stringify({ symbol: symbol, file: fileContent }),
-                });
-                
-                const json = await response.json();
-                setData(`data:image/png;base64,${json.image}`);
-                console.log('Data:', data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };        
+    };  
 
         useEffect(() => {
-            if (fileContent) {
-                fetch_first_history();
-            }
-        }, [fileContent]);
+            fetch_history();    
+        }, []);
 
-        return (
-            fileDisplay ? (
+        return ((
                 <div>
-                    <input type="file" accept=".json" onChange={handleFileUpload} />
-                </div>
-            ) : (
-                <div>
+                    <div><Button onClick={() => setShowHistory(false)}>Back</Button></div>
                     <Card>
                         <Card.Img src={data} />
                     </Card>
