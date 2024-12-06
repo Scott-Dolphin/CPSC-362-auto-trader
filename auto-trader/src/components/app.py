@@ -125,7 +125,7 @@ def get_download(symbol):
 
 
 # sma endpoint
-
+ 
 @app.route('/api/sma', methods=['POST'])
 def get_sma():
     try:
