@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import HistoryGraph from './HistoryGraph';
 import StrategyDisplay from './StrategyDisplay';
-import { handleDownload, handleFileDownload } from './controller';
+import { handleDownload } from './controller';
 
 export default function Navbar() {
     const [selectedValue, setSelectedValue] = useState('FNGU');
-    const [data, setData] = useState(null);
     const [downloaded, setDownloaded] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [showStrat, setShowStrat] = useState(false);
@@ -18,7 +17,7 @@ export default function Navbar() {
 
     // Fetch data from the server
     const Download = async () => {
-        await handleDownload(selectedValue, setData, setDownloaded);
+        await handleDownload(selectedValue, setDownloaded);
     };
 
     const get_history = () => {
@@ -29,16 +28,12 @@ export default function Navbar() {
         setShowStrat(true);
     };
 
-    useEffect(() => {
-        handleFileDownload(data);
-    }, [data]);
-
     return (
         downloaded ? (
             showHistory ? (
-                <HistoryGraph symbol={selectedValue} />
+                <HistoryGraph symbol={selectedValue} setShowHistory={setShowHistory} />
             ) : showStrat ? (
-                <StrategyDisplay symbol={selectedValue} />
+                <StrategyDisplay symbol={selectedValue} setShowStrat={setShowStrat}/>
             ) : (
                 <div>
                     <Button onClick={get_history}>Show Historical Graph</Button>
