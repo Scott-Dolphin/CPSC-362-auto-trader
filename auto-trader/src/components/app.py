@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 import yfinance as yf
 import pandas as pd
@@ -62,6 +62,64 @@ def plot(history_dict, symbol):
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close()
     return jsonify({'image': img_base64})
+
+def plot_with_signals(stock_data, signals, symbol, title, additional_plots=None):
+    """
+    General-purpose function to plot stock data with buy/sell signals.
+
+    Parameters:
+    - stock_data: DataFrame containing stock data with a DateTime index.
+    - signals: List of dictionaries containing 'date', 'action', and 'price'.
+    - symbol: Stock symbol.
+    - title: Title of the plot.
+    - additional_plots: List of tuples containing (column_name, label, color) for additional plots.
+    """
+    try:
+        plt.figure(figsize=(10, 5))  # Adjust the size to make the graph smaller
+
+        # Plot the Close price line
+        plt.plot(stock_data.index, stock_data['Close'], label='Close Price', color='blue')
+
+        # Plot additional data if provided
+        if additional_plots:
+            for column_name, label, color in additional_plots:
+                plt.plot(stock_data.index, stock_data[column_name], label=label, color=color)
+
+        # Flags to track if the legend labels have been added
+        buy_label_added = False
+        sell_label_added = False
+
+        # Plot buy/sell signals with larger and more distinct markers
+        for signal in signals:
+            if signal['action'] == 'buy':
+                if not buy_label_added:
+                    plt.scatter(signal['date'], signal['price'], marker='^', color='green', label='Buy Signal', s=200, edgecolors='black', alpha=1)
+                    buy_label_added = True
+                else:
+                    plt.scatter(signal['date'], signal['price'], marker='^', color='green', s=200, edgecolors='black', alpha=1)
+            elif signal['action'] == 'sell':
+                if not sell_label_added:
+                    plt.scatter(signal['date'], signal['price'], marker='v', color='red', label='Sell Signal', s=200, edgecolors='black', alpha=1)
+                    sell_label_added = True
+                else:
+                    plt.scatter(signal['date'], signal['price'], marker='v', color='red', s=200, edgecolors='black', alpha=1)
+
+        plt.title(title)
+        plt.xlabel('Date')
+        plt.ylabel('Price')
+        plt.legend()
+        plt.grid()
+
+        # Save the plot to a BytesIO object
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close()
+        return buf
+
+    except Exception as e:
+        print(f"Error in plot_with_signals: {str(e)}")
+        raise
 
 # Helper function to check and load JSON data
 def load_data_from_json(json_file):
@@ -174,46 +232,66 @@ def get_sma():
         print("Error in /api/sma:", str(e))
         return jsonify({'error': str(e)}), 500
 
-
-# sma crossover
-@app.route('/api/sma_crossover', methods=['POST'])
-def sma_crossover():
+@app.route('/api/sma_crossover_plot', methods=['POST'])
+def sma_crossover_plot():
     try:
         data = request.json
         symbol = data.get('symbol')
-        short_period = data.get('short_period', 50)  # Default short-term period is 50
-        long_period = data.get('long_period', 200)  # Default long-term period is 200
+        short_period = data.get('short_period', 50)
+        long_period = data.get('long_period', 200)
 
         if not symbol:
             raise ValueError('Symbol is missing or None')
+        if short_period >= long_period:
+            raise ValueError("Short period must be less than long period.")
 
         symbol = symbol.upper()
-        
+
+        # Fetch historical data and calculate SMAs
         ETF = yf.Ticker(symbol)
-        stock_data = ETF.history(period='2y', actions=False)  # Fetch 2 years of data
-        
+        stock_data = ETF.history(period='2y', actions=False)
+
+        if len(stock_data) < long_period:
+            raise ValueError("Not enough data to calculate the long-period SMA.")
+
         stock_data['SMA_short'] = stock_data['Close'].rolling(window=short_period).mean()
         stock_data['SMA_long'] = stock_data['Close'].rolling(window=long_period).mean()
-
+        stock_data = stock_data.dropna()
         stock_data.index = stock_data.index.strftime('%Y-%m-%d')
 
         # Generate Buy/Sell signals
         signals = []
-        position = 0  # Track current position (1 for holding, 0 for no position)
+        position = 0
         for i in range(1, len(stock_data)):
-            if stock_data['SMA_short'].iloc[i] > stock_data['SMA_long'].iloc[i] and position == 0:
+            if (stock_data['SMA_short'].iloc[i] > stock_data['SMA_long'].iloc[i] and
+                stock_data['SMA_short'].iloc[i - 1] <= stock_data['SMA_long'].iloc[i - 1] and
+                position == 0):
                 signals.append({'date': stock_data.index[i], 'action': 'buy', 'price': stock_data['Close'].iloc[i]})
-                position = 1  # Enter a position (bought)
-            elif stock_data['SMA_short'].iloc[i] < stock_data['SMA_long'].iloc[i] and position == 1:
+                position = 1
+            elif (stock_data['SMA_short'].iloc[i] < stock_data['SMA_long'].iloc[i] and
+                  stock_data['SMA_short'].iloc[i - 1] >= stock_data['SMA_long'].iloc[i - 1] and
+                  position == 1):
                 signals.append({'date': stock_data.index[i], 'action': 'sell', 'price': stock_data['Close'].iloc[i]})
-                position = 0  # Exit the position (sold)
+                position = 0
 
-        return jsonify({'signals': signals})
+        # Force a sell if a position remains at the end
+        if position == 1:
+            last_date = stock_data.index[-1]
+            last_price = stock_data['Close'].iloc[-1]
+            signals.append({'date': last_date, 'action': 'sell', 'price': last_price})
+            position = 0
+
+        # Plot the data with signals
+        buf = plot_with_signals(stock_data, signals, symbol, f'{symbol} Price with SMA Crossover Signals')
+
+        # Encode the image in base64
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+        return jsonify({'signals': signals, 'image': img_base64})
 
     except Exception as e:
-        print("Error in SMA Crossover:", str(e))
+        app.logger.error(f"Error in SMA Crossover Plot: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 # backtest
 @app.route('/api/backtest', methods=['POST'])
 def backtest():
@@ -371,46 +449,61 @@ def run_backtest_and_log(signals, strategy_name):
     return jsonify({'log': log, 'total_gain': total_gain, 'annual_return': annual_return})
 
 
-@app.route('/api/bollinger_bands', methods=['POST'])
-def bollinger_bands():
+# Example usage in a trading strategy function for Bollinger Bands
+@app.route('/api/bollinger_bands_plot', methods=['POST'])
+def bollinger_bands_plot():
     try:
-        # Capture request data
         data = request.json
         symbol = data.get('symbol')
-        sma_period = data.get('sma_period', 20)  # Use provided SMA period, default to 20
-        std_dev_multiplier = data.get('std_dev_multiplier', 2)  # Use provided multiplier, default to 2
+        sma_period = data.get('sma_period', 20)
+        std_dev_multiplier = data.get('std_dev_multiplier', 2)
 
-        # Fetch stock data from Yahoo Finance for the symbol
+        if not symbol:
+            raise ValueError('Symbol is missing or None')
+
+        symbol = symbol.upper()
+
+        # Fetch historical data and calculate Bollinger Bands
         ETF = yf.Ticker(symbol)
         stock_data = ETF.history(period='2y', actions=False)
 
-        # Calculate SMA (Simple Moving Average) and the Bollinger Bands
         stock_data['SMA'] = stock_data['Close'].rolling(window=sma_period).mean()
         stock_data['Upper Band'] = stock_data['SMA'] + (stock_data['Close'].rolling(window=sma_period).std() * std_dev_multiplier)
         stock_data['Lower Band'] = stock_data['SMA'] - (stock_data['Close'].rolling(window=sma_period).std() * std_dev_multiplier)
-
-        # Format date for easier output
+        stock_data = stock_data.dropna()
         stock_data.index = stock_data.index.strftime('%Y-%m-%d')
 
         # Generate Buy/Sell signals based on Bollinger Bands
         signals = []
-        position = 0  # Track whether we hold a position or not
-
+        position = 0
         for i in range(1, len(stock_data)):
-            # Buy if price crosses below the lower band and we're not in a position
             if stock_data['Close'].iloc[i] < stock_data['Lower Band'].iloc[i] and position == 0:
                 signals.append({'date': stock_data.index[i], 'action': 'buy', 'price': stock_data['Close'].iloc[i]})
-                position = 1  # Enter a position (buy)
-            # Sell if price crosses above the upper band and we are holding a position
+                position = 1
             elif stock_data['Close'].iloc[i] > stock_data['Upper Band'].iloc[i] and position == 1:
                 signals.append({'date': stock_data.index[i], 'action': 'sell', 'price': stock_data['Close'].iloc[i]})
-                position = 0  # Exit position (sell)
+                position = 0
 
-        return jsonify({'signals': signals})
+        # Force a sell if a position remains at the end
+        if position == 1:
+            last_date = stock_data.index[-1]
+            last_price = stock_data['Close'].iloc[-1]
+            signals.append({'date': last_date, 'action': 'sell', 'price': last_price})
+            position = 0
+
+        # Plot the data with signals
+        additional_plots = [
+        ]
+        buf = plot_with_signals(stock_data, signals, symbol, f'{symbol} Price with Bollinger Bands Signals', additional_plots)
+
+        # Encode the image in base64
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+        return jsonify({'signals': signals, 'image': img_base64})
 
     except Exception as e:
+        app.logger.error(f"Error in Bollinger Bands Plot: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 
 # Backtest for Bollinger Bands
 @app.route('/api/bb_backtest', methods=['POST'])
@@ -424,38 +517,61 @@ def bb_backtest():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/macd', methods=['POST'])
-def macd():
+@app.route('/api/macd_plot', methods=['POST'])
+def macd_plot():
     try:
         data = request.json
         symbol = data.get('symbol')
-        short_ema_period = data.get('short_ema_period', 12)  # Default is 12
-        long_ema_period = data.get('long_ema_period', 26)  # Default is 26
-        signal_period = data.get('signal_period', 9)  # Default is 9
+        short_period = data.get('short_period', 12)
+        long_period = data.get('long_period', 26)
+        signal_period = data.get('signal_period', 9)
 
+        if not symbol:
+            raise ValueError('Symbol is missing or None')
+
+        symbol = symbol.upper()
+
+        # Fetch historical data and calculate MACD
         ETF = yf.Ticker(symbol)
         stock_data = ETF.history(period='2y', actions=False)
 
-        stock_data['EMA_short'] = stock_data['Close'].ewm(span=short_ema_period, adjust=False).mean()
-        stock_data['EMA_long'] = stock_data['Close'].ewm(span=long_ema_period, adjust=False).mean()
+        stock_data['EMA_short'] = stock_data['Close'].ewm(span=short_period, adjust=False).mean()
+        stock_data['EMA_long'] = stock_data['Close'].ewm(span=long_period, adjust=False).mean()
         stock_data['MACD'] = stock_data['EMA_short'] - stock_data['EMA_long']
-        stock_data['Signal'] = stock_data['MACD'].ewm(span=signal_period, adjust=False).mean()
-
+        stock_data['Signal Line'] = stock_data['MACD'].ewm(span=signal_period, adjust=False).mean()
+        stock_data = stock_data.dropna()
         stock_data.index = stock_data.index.strftime('%Y-%m-%d')
 
+        # Generate Buy/Sell signals based on MACD
         signals = []
         position = 0
         for i in range(1, len(stock_data)):
-            if stock_data['MACD'].iloc[i] > stock_data['Signal'].iloc[i] and position == 0:
+            if stock_data['MACD'].iloc[i] > stock_data['Signal Line'].iloc[i] and stock_data['MACD'].iloc[i - 1] <= stock_data['Signal Line'].iloc[i - 1] and position == 0:
                 signals.append({'date': stock_data.index[i], 'action': 'buy', 'price': stock_data['Close'].iloc[i]})
                 position = 1
-            elif stock_data['MACD'].iloc[i] < stock_data['Signal'].iloc[i] and position == 1:
+            elif stock_data['MACD'].iloc[i] < stock_data['Signal Line'].iloc[i] and stock_data['MACD'].iloc[i - 1] >= stock_data['Signal Line'].iloc[i - 1] and position == 1:
                 signals.append({'date': stock_data.index[i], 'action': 'sell', 'price': stock_data['Close'].iloc[i]})
                 position = 0
 
-        return jsonify({'signals': signals})
+        # Force a sell if a position remains at the end
+        if position == 1:
+            last_date = stock_data.index[-1]
+            last_price = stock_data['Close'].iloc[-1]
+            signals.append({'date': last_date, 'action': 'sell', 'price': last_price})
+            position = 0
+
+        # Plot the data with signals
+        additional_plots = [
+        ]
+        buf = plot_with_signals(stock_data, signals, symbol, f'{symbol} Price with MACD Signals', additional_plots)
+
+        # Encode the image in base64
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+        return jsonify({'signals': signals, 'image': img_base64})
 
     except Exception as e:
+        app.logger.error(f"Error in MACD Plot: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
