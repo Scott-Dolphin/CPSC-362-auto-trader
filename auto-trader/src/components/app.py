@@ -121,18 +121,6 @@ def plot_with_signals(stock_data, signals, symbol, title, additional_plots=None)
         print(f"Error in plot_with_signals: {str(e)}")
         raise
 
-# Helper function to check and load JSON data
-def load_data_from_json(json_file):
-    if os.path.exists(json_file):
-        with open(json_file, 'r') as file:
-            return json.load(file)
-    return None
-
-# Helper function to save data to a JSON file
-def save_data_to_json(json_file, data):
-    with open(json_file, 'w') as file:
-        json.dump(data, file, indent=4)
-
 # endpoint that takes a json file or time range
 
 @app.route('/api/stock/json/', methods=['POST'])
@@ -168,7 +156,16 @@ def get_stock_data():
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/stock/real/<symbol>', methods=['GET'])
+def get_stock_real_data(symbol):
 
+    ETF = yf.Ticker(symbol)
+    day_price = round(ETF.history(period="1d")['Close'][0], 2)
+    week_price = round(ETF.history(period="5d")['Close'][0], 2)
+    rate_of_change = round((day_price - week_price) / (4), 2)
+
+    return jsonify({'day_price': day_price, 'week_price': week_price, 'rate_of_change': rate_of_change})
 
 
 # endpoint that 
@@ -181,56 +178,6 @@ def get_download(symbol):
 
     return jsonify(history_dict)
 
-
-# sma endpoint
- 
-@app.route('/api/sma', methods=['POST'])
-def get_sma():
-    try:
-        # Capture incoming request data
-        data = request.json
-        symbol = data.get('symbol')
-        period = data.get('period', 50)  # Default to 50 if no period provided
-
-        print("Received symbol:", symbol)
-        print("Received period:", period)
-
-        # Define the JSON file where stock data is stored
-        json_file = f"{symbol}_full_data.json"
-
-        # Check if the JSON file exists, load data from it
-        stock_data = load_data_from_json(json_file)
-
-        if stock_data is None:
-            # Fetch stock data from Yahoo Finance if not in the JSON file
-            ETF = yf.Ticker(symbol)
-            stock_data = ETF.history(period='1y', actions=False).to_dict(orient='index')
-            save_data_to_json(json_file, stock_data)
-
-        # Convert the dictionary back to a pandas DataFrame for processing
-        stock_df = pd.DataFrame.from_dict(stock_data, orient='index')
-
-        # Ensure the data is sorted by date in case it's not
-        stock_df = stock_df.sort_index()
-
-        # Check if the 'Close' column exists
-        if 'Close' not in stock_df.columns:
-            raise ValueError("The 'Close' column is missing from the stock data.")
-
-        # Calculate SMA
-        stock_df['SMA'] = stock_df['Close'].rolling(window=period).mean()
-
-        # Format data for JSON response
-        stock_df.index = stock_df.index.strftime('%Y-%m-%d')
-        sma_dict = stock_df[['SMA']].dropna().to_dict(orient='index')  # Drop rows with NaN SMA
-
-        # Return calculated SMA as JSON
-        return jsonify({'sma': sma_dict})
-
-    except Exception as e:
-        # Print the error to the console for debugging
-        print("Error in /api/sma:", str(e))
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/sma_crossover_plot', methods=['POST'])
 def sma_crossover_plot():

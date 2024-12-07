@@ -16,6 +16,18 @@ body {
     justify-content: space-between;
 }
 
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 50px;
+    background-color: #333;
+    color: white;
+    border-radius: 10px;
+    margin-bottom: 90px;
+}
+
 .nav select, .nav button {
     cursor: pointer;
     border-radius: 10px;
@@ -24,8 +36,20 @@ body {
     
     border: 1px solid black;
 }
+.direct {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    justify-content: center;
+    align-items: center; /* Center items horizontally */
+    margin-top: 20px;
+}
+
 .card {
    width: auto;
+}
+.head {
+    color: white;
+
 }
 
 button {
@@ -215,6 +239,7 @@ button.calculate-btn:hover, button.backtest-btn:hover, button.log-btn:hover {
 
 .button-container {
     display: flex;
+    
     flex-direction: row;
     justify-content: center;  /* Center the buttons */
     margin-bottom: 20px;  /* Add margin below the button group */
