@@ -1,0 +1,44 @@
+.
+├── auto-trader
+│   ├── dist
+│   │   ├── assets
+│   │   │   ├── index-B3bnWmT4.css
+│   │   │   └── index-TV_f8TTL.js
+│   │   ├── index.html
+│   │   └── vite.svg
+│   ├── eslint.config.js
+│   ├── FNGU_full_data.json
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public
+│   │   └── vite.svg
+│   ├── README.md
+│   ├── src
+│   │   ├── components
+│   │   │   ├── app.py
+│   │   │   ├── BB.jsx
+│   │   │   ├── controller.jsx
+│   │   │   ├── dataModel.jsx
+│   │   │   ├── HistoryGraph.jsx
+│   │   │   ├── MACD.jsx
+│   │   │   ├── navbar.jsx
+│   │   │   ├── SMACrossover.jsx
+│   │   │   ├── StrategyDisplay.jsx
+│   │   │   └── test.py
+│   │   ├── index.css
+│   │   ├── main.jsx
+│   │   ├── routes
+│   │   │   └── Root.jsx
+│   │   └── trade_log.csv
+│   ├── trade_log.csv
+│   └── vite.config.js
+├── deploy.sh
+├── LICENSE
+├── package.json
+├── package-lock.json
+├── README.md
+├── requirements.txt
+└── tree.txt
+
+8 directories, 34 files
