@@ -161,8 +161,8 @@ def get_stock_data():
 def get_stock_real_data(symbol):
 
     ETF = yf.Ticker(symbol)
-    day_price = round(ETF.history(period="1d")['Close'][0], 2)
-    week_price = round(ETF.history(period="5d")['Close'][0], 2)
+    day_price = round(ETF.history(period="1d")['Close'].iloc[0], 2)
+    week_price = round(ETF.history(period="5d")['Close'].iloc[0], 2)
     rate_of_change = round((day_price - week_price) / (4), 2)
 
     return jsonify({'day_price': day_price, 'week_price': week_price, 'rate_of_change': rate_of_change})

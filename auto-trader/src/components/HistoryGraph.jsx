@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Card } from 'react-bootstrap';
+import { IoArrowBackCircleSharp } from "react-icons/io5";
+
 import DatePicker from 'react-datepicker';
 import { format, set } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -55,7 +57,8 @@ export default function HistoryGraph({symbol, setShowHistory}) {
 
         return ((
                 <div>
-                    <div><Button onClick={() => setShowHistory(false)}>Back</Button></div>
+                    <IoArrowBackCircleSharp style={{padding:"10px", color: "#ce8f55", display: "flex", justifyContent: "space-between", alignItems: "flex-start"}}
+                                            onClick={() => setShowHistory(false)}/>
                     <Card>
                         <Card.Img src={data} />
                     </Card>

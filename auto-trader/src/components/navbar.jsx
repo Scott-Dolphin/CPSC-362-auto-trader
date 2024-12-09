@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
+import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle } from "react-icons/io";
+import { IoArrowBackCircleSharp } from "react-icons/io5";
+
 import HistoryGraph from './HistoryGraph';
 import StrategyDisplay from './StrategyDisplay';
 import { handleDownload } from './controller';
@@ -39,10 +42,22 @@ export default function Navbar() {
                 <StrategyDisplay symbol={selectedValue} setShowStrat={setShowStrat}/>
             ) : (
                     <div className='navbar'>
-
+                        <IoArrowBackCircleSharp style={{color: "#ce8f55"}} onClick={() => setDownloaded(false)}/>
                          <div>
-                            <h1 className="head">{selectedValue} Selected</h1>
-                            <h2>change</h2>
+                            <h1 className="head">{selectedValue} Change</h1>
+                            {data ? (
+                                <div>
+                                    
+                                <h3><strong style={{color: "#ce8f55"}}>Last Close price</strong>:&nbsp;&nbsp;&nbsp;{data.day_price}</h3>
+                                <h3><strong style={{color: "#ce8f55"}}>Price 5 days ago</strong>:&nbsp;&nbsp;&nbsp;{data.week_price}</h3>
+                                <h3><strong style={{color: "#ce8f55"}}>Rate of Change</strong>:&nbsp;&nbsp;&nbsp;{data.rate_of_change} {data.rate_of_change > 0 ?
+                                 (<IoMdArrowDropupCircle style={{color: "green"}}/>):(<IoMdArrowDropdownCircle style={{color: "red"}}/>)}</h3>
+                                
+                                </div>
+                                ) : (
+                                <h2>Loading...</h2>
+                                )}
+
                         </div>
 
                         <div className="direct">
