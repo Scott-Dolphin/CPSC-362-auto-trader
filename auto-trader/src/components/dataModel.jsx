@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 
 export const fetchData = async (symbol) => {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/api/stock/real/${symbol}`);
+        const response = await fetch(`http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/real/${symbol}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -17,7 +17,7 @@ export const fetchData = async (symbol) => {
 
 export const fetchHistory = async (symbol, startDate, endDate) => {
     try {
-        const response = await fetch('http://127.0.0.1:3000/api/stock/', {
+        const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

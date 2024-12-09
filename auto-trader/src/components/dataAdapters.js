@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 
-const API_URL = 'http://127.0.0.1:3000/api';
+const API_URL = 'http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api';
 
 export class DataAdapter {
     async fetchData(symbol, params) {
