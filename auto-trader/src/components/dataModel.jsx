@@ -11,20 +11,3 @@ export const fetchData = async (symbol) => {
         throw err;
     }
 };
- 
-export const downloadFile = (data) => {
-    if (data == null) { return; }
-
-    const fileName = 'data.json';
-    const json = JSON.stringify(data);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}; 
