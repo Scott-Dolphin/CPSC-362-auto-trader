@@ -23,7 +23,7 @@ export default function HistoryGraph({symbol, setShowHistory}) {
     const handleEndDateChange = (date) => {
         setEndDate(date);
     };
-
+    
 
     // Fetch historical data based on selected date range
     const fetch_history = async () => {

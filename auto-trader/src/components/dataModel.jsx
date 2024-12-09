@@ -11,7 +11,7 @@ export const fetchData = async (symbol) => {
         throw err;
     }
 };
-
+ 
 export const downloadFile = (data) => {
     if (data == null) { return; }
 
@@ -27,4 +27,4 @@ export const downloadFile = (data) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-};
+}; 

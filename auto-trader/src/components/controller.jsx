@@ -11,4 +11,4 @@ export const handleDownload = async (symbol, setData, setDownloaded) => {
         console.error('Error downloading data:', err);
     }
 };
-
+ 

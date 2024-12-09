@@ -15,7 +15,7 @@ export default function MACD({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/macd_plot', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/macd
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/macd_plot', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/macd
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export default function MACD({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/backtest', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
