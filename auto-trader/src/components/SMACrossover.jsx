@@ -14,7 +14,7 @@ export default function SMACrossover({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/api/sma_crossover_plot', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/sma_crossover_plot
+            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/sma_crossover_plot', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/sma_crossover_plot
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
