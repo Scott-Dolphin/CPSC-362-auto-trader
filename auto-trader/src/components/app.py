@@ -12,12 +12,16 @@ import json
 from matplotlib.ticker import MaxNLocator
 import csv
 from datetime import datetime
+from functools import wraps
+from flask import request, jsonify
 
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Set maximum request size to 16 MB
 
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+
+
 
 def plot(history_dict, symbol):
     # Sample data
@@ -121,9 +125,28 @@ def plot_with_signals(stock_data, signals, symbol, title, additional_plots=None)
         print(f"Error in plot_with_signals: {str(e)}")
         raise
 
+
+def log_request_response(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Log the request
+        app.logger.info(f"Request: {request.method} {request.url}")
+        app.logger.info(f"Request data: {request.get_json()}")
+
+        # Call the original function
+        response = f(*args, **kwargs)
+
+        # Log the response
+        app.logger.info(f"Response: {response.status_code} {response.get_json()}")
+        print(f"Response: {response.status_code} {request.method} {request.url}")
+
+        return response
+    return decorated_function
+
 # endpoint that takes a json file or time range
 
 @app.route('/api/stock/json/', methods=['POST'])
+@log_request_response
 def plot_json():
     try:
         data = request.json
@@ -170,6 +193,7 @@ def get_stock_real_data(symbol):
 
 # endpoint that 
 @app.route('/api/stock/<symbol>', methods=['GET'])
+@log_request_response
 def get_download(symbol):
     ETF = yf.Ticker(symbol)
     data = ETF.history(start='2021-01-01', actions=False)
@@ -180,6 +204,7 @@ def get_download(symbol):
 
 
 @app.route('/api/sma_crossover_plot', methods=['POST'])
+@log_request_response
 def sma_crossover_plot():
     try:
         data = request.json

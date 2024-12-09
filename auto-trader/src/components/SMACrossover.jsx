@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SMACrossoverAdapter } from './dataAdapters';
 
 export default function SMACrossover({ symbol }) {
     const [shortPeriod, setShortPeriod] = useState(20);  // Default short-term SMA period
@@ -9,31 +10,21 @@ export default function SMACrossover({ symbol }) {
     const [error, setError] = useState(null);            // Error state
     const [graphUrl, setGraphUrl] = useState(null);      // URL for the graph image
 
+    const adapter = new SMACrossoverAdapter();
+
     const getSMACrossover = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/sma_crossover_plot', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/sma_crossover_plot
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ symbol: symbol, short_period: shortPeriod, long_period: longPeriod }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await adapter.fetchData(symbol, { short_period: shortPeriod, long_period: longPeriod });
             if (data.signals) {
                 setSignals(data.signals);
                 const imageUrl = `data:image/png;base64,${data.image}`;
                 setGraphUrl(imageUrl);
             } else {
-                setSignals(null);  // Handle case where there are no signals
-                setGraphUrl(null); // Clear the graph URL
+                setSignals(null);
+                setGraphUrl(null);
             }
         } catch (error) {
             console.error('Error fetching SMA Crossover data:', error);
@@ -48,15 +39,7 @@ export default function SMACrossover({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ signals: signals }),
-            });
-
-            const data = await response.json();
+            const data = await adapter.runBacktest(signals);
             setBacktestData(data);
         } catch (error) {
             console.error('Error running backtest:', error);
@@ -71,15 +54,7 @@ export default function SMACrossover({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest_log', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest_log
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ signals: signals }),
-            });
-
-            const data = await response.json();
+            const data = await adapter.logTrades(signals);
             alert(data.message);  // Show alert with confirmation
         } catch (error) {
             console.error('Error logging trades:', error);

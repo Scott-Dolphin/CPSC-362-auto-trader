@@ -14,6 +14,7 @@ export default function Navbar() {
     const [showHistory, setShowHistory] = useState(false);
     const [showStrat, setShowStrat] = useState(false);
     const [data, setData] = useState(null);
+    const [showChange, setShowChange] = useState(true);
     // Handle select change
     const handleSelectChange = (event) => {
         setSelectedValue(event.target.value);
@@ -35,15 +36,23 @@ export default function Navbar() {
         console.log('Data:', data);
     }, [data]);
 
-    return (downloaded ? (
+    return (
+        
+        downloaded ? (
             showHistory ? (
                 <HistoryGraph symbol={selectedValue} setShowHistory={setShowHistory} />
             ) : showStrat ? (
                 <StrategyDisplay symbol={selectedValue} setShowStrat={setShowStrat}/>
             ) : (
+                
                     <div className='navbar'>
+                        
                         <IoArrowBackCircleSharp style={{color: "#ce8f55"}} onClick={() => setDownloaded(false)}/>
+                            <div>Show Change<input type="checkbox" checked={showChange} onChange={() => setShowChange(!showChange)} /></div>
                          <div>
+                            
+                            {showChange && (
+                            <>
                             <h1 className="head">{selectedValue} Change</h1>
                             {data ? (
                                 <div>
@@ -57,6 +66,8 @@ export default function Navbar() {
                                 ) : (
                                 <h2>Loading...</h2>
                                 )}
+                            </>
+                            )}
 
                         </div>
 

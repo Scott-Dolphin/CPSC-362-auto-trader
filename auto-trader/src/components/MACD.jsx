@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MACDAdapter } from './dataAdapters';
 
 export default function MACD({ symbol }) {
     const [shortPeriod, setShortPeriod] = useState(20);  // Default short-term period
@@ -10,35 +11,25 @@ export default function MACD({ symbol }) {
     const [error, setError] = useState(null);            // Error state
     const [graphUrl, setGraphUrl] = useState(null);      // URL for the graph image
 
+    const adapter = new MACDAdapter();
+
     const calculateMACD = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/macd_plot', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/macd
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ symbol: symbol, short_period: shortPeriod, long_period: longPeriod, signal_period: signalPeriod }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
+            const data = await adapter.fetchData(symbol, { short_period: shortPeriod, long_period: longPeriod, signal_period: signalPeriod });
             if (data.signals) {
                 setSignals(data.signals);
                 const imageUrl = `data:image/png;base64,${data.image}`;
                 setGraphUrl(imageUrl);
             } else {
-                setSignals(null);  // Handle case where there are no signals
-                setGraphUrl(null); // Clear the graph URL
+                setSignals(null);
+                setGraphUrl(null);
             }
         } catch (error) {
-            console.error('Error calculating MACD:', error);
-            setError(`Failed to calculate MACD. Please try again. Error: ${error.message}`);
+            console.error('Error fetching MACD data:', error);
+            setError('Failed to fetch MACD signals and graph. Please try again.');
         }
 
         setLoading(false);
@@ -49,19 +40,11 @@ export default function MACD({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ signals: signals }),
-            });
-
-            const data = await response.json();
+            const data = await adapter.runBacktest(signals);
             setBacktestData(data);
         } catch (error) {
             console.error('Error running backtest:', error);
-            setError(`Failed to backtest the strategy. Please try again. Error: ${error.message}`);
+            setError('Failed to backtest the strategy. Please try again.');
         }
 
         setLoading(false);
@@ -72,19 +55,11 @@ export default function MACD({ symbol }) {
         setError(null);
 
         try {
-            const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest_log', { //http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/backtest_log
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ signals: signals }),
-            });
-
-            const data = await response.json();
+            const data = await adapter.logTrades(signals);
             alert(data.message);  // Show alert with confirmation
         } catch (error) {
             console.error('Error logging trades:', error);
-            setError(`Failed to log trades. Please try again. Error: ${error.message}`);
+            setError('Failed to log trades. Please try again.');
         }
 
         setLoading(false);

@@ -1,5 +1,5 @@
 import { fetchData } from './dataModel';
-
+import { fetchHistory } from './dataModel';
 export const handleDownload = async (symbol, setData, setDownloaded) => {
     try {
         fetchData(symbol).then((data) => {
@@ -12,3 +12,11 @@ export const handleDownload = async (symbol, setData, setDownloaded) => {
     }
 };
  
+export const handleFetchHistory = async (symbol, startDate, endDate, setData) => {
+    try {
+        const imageData = await fetchHistory(symbol, startDate, endDate);
+        setData(imageData);
+    } catch (error) {
+        console.error('Error fetching history data:', error);
+    }
+};
