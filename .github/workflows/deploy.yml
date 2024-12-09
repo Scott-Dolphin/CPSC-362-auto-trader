@@ -46,4 +46,4 @@ jobs:
 
       - name: Deploy Flask backend
         run: |
-          ssh -o StrictHostKeyChecking=no ec2-user@ec2-3-138-198-12.us-east-2.compute.amazonaws.com "bash CPSC-362-auto-trader/deploy.sh"
+          ssh -o StrictHostKeyChecking=no admin@ec2-3-138-198-12.us-east-2.compute.amazonaws.com "bash CPSC-362-auto-trader/deploy.sh"
