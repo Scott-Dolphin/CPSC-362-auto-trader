@@ -1,4 +1,4 @@
-import { fetchData, downloadFile } from './dataModel';
+import { fetchData } from './dataModel';
 
 export const handleDownload = async (symbol, setData, setDownloaded) => {
     try {
