@@ -17,7 +17,7 @@ export const fetchData = async (symbol) => {
 
 export const fetchHistory = async (symbol, startDate, endDate) => {
     try {
-        const response = await fetch('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api/stock/', {
+        const response = await fetch('http://127.0.0.1:3000/api/stock/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
