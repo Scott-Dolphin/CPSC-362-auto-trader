@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import { IoMdArrowDropupCircle, IoMdArrowDropdownCircle } from "react-icons/io";
 import { IoArrowBackCircleSharp } from "react-icons/io5";
+import { useRealtimeUpdates } from './controller';
 
 import HistoryGraph from './HistoryGraph';
 import StrategyDisplay from './StrategyDisplay';
 import { handleDownload } from './controller';
+
 import { use } from 'react';
 
 export default function Navbar() {
@@ -14,7 +16,7 @@ export default function Navbar() {
     const [showHistory, setShowHistory] = useState(false);
     const [showStrat, setShowStrat] = useState(false);
     const [data, setData] = useState(null);
-    const [showChange, setShowChange] = useState(true);
+
     // Handle select change
     const handleSelectChange = (event) => {
         setSelectedValue(event.target.value);
@@ -36,6 +38,8 @@ export default function Navbar() {
         console.log('Data:', data);
     }, [data]);
 
+    useRealtimeUpdates(setData);
+    
     return (
         
         downloaded ? (
@@ -48,17 +52,14 @@ export default function Navbar() {
                     <div className='navbar'>
                         
                         <IoArrowBackCircleSharp style={{color: "#ce8f55"}} onClick={() => setDownloaded(false)}/>
-                            <div>Show Change<input type="checkbox" checked={showChange} onChange={() => setShowChange(!showChange)} /></div>
                          <div>
                             
-                            {showChange && (
-                            <>
-                            <h1 className="head">{selectedValue} Change</h1>
+
                             {data ? (
                                 <div>
                                     
-                                <h3><strong style={{color: "#ce8f55"}}>Last Close price</strong>:&nbsp;&nbsp;&nbsp;{data.day_price}</h3>
-                                <h3><strong style={{color: "#ce8f55"}}>Price 5 days ago</strong>:&nbsp;&nbsp;&nbsp;{data.week_price}</h3>
+                                <h3><strong style={{color: "#ce8f55"}}>Last Close price</strong>:&nbsp;&nbsp;&nbsp;{data.today}</h3>
+                                <h3><strong style={{color: "#ce8f55"}}>Price 5 days ago</strong>:&nbsp;&nbsp;&nbsp;{data.five_day}</h3>
                                 <h3><strong style={{color: "#ce8f55"}}>Rate of Change</strong>:&nbsp;&nbsp;&nbsp;{data.rate_of_change} {data.rate_of_change > 0 ?
                                  (<IoMdArrowDropupCircle style={{color: "green"}}/>):(<IoMdArrowDropdownCircle style={{color: "red"}}/>)}</h3>
                                 
@@ -66,8 +67,6 @@ export default function Navbar() {
                                 ) : (
                                 <h2>Loading...</h2>
                                 )}
-                            </>
-                            )}
 
                         </div>
 

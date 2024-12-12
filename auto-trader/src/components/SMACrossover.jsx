@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SMACrossoverAdapter } from './dataAdapters';
+import { SMACrossoverAdapter } from './controller';
 
 export default function SMACrossover({ symbol }) {
     const [shortPeriod, setShortPeriod] = useState(20);  // Default short-term SMA period

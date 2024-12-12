@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BBAdapter } from './dataAdapters';
+import { BBAdapter } from './controller';
 export default function BB({ symbol }) {
     const [period, setPeriod] = useState(20);  // Default SMA period
     const [stdDevMultiplier, setStdDevMultiplier] = useState(2);  // Default standard deviation multiplier

@@ -1,4 +1,3 @@
-# auto-trader/src/components/dataModel.py
 import yfinance as yf
 
 def get_stock_history(symbol, start_date=None, end_date=None, period=None):

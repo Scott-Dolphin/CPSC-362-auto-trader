@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MACDAdapter } from './dataAdapters';
+import { MACDAdapter } from './controller';
 
 export default function MACD({ symbol }) {
     const [shortPeriod, setShortPeriod] = useState(20);  // Default short-term period
