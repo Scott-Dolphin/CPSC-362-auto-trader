@@ -4,7 +4,7 @@ import { json } from 'react-router-dom';
 import io from 'socket.io-client';
 
 
-const socket = io('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api');
+const socket = io('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com');
 const API_URL = 'http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api';
 
 export const handleDownload = async (symbol, setData, setDownloaded) => {
