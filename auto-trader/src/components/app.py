@@ -5,7 +5,7 @@ import threading
 import time
 from functools import wraps
 from flask import request, jsonify
-from flask_socketio import SocketIO, emit
+#from flask_socketio import SocketIO, emit
 from dataModel import get_stock_history, get_stock_real_data
 from calc import *
 
