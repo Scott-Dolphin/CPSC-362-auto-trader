@@ -11,7 +11,7 @@ from calc import *
 
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+#socketio = SocketIO(app, cors_allowed_origins="*")
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Set maximum request size to 16 MB
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -34,7 +34,7 @@ def log_request_response(f):
     return decorated_function
 
 
-def send_realtime_update(today, five_day, rate_of_change):
+#/def send_realtime_update(today, five_day, rate_of_change):
     if today is not None and five_day is not None and rate_of_change is not None:
         data = {
             'today': today,
@@ -45,7 +45,7 @@ def send_realtime_update(today, five_day, rate_of_change):
     else:
         print("Error: 'today' or 'five_day' is None")
 
-def background_thread():
+#/def background_thread():
     while True:
         if global_symbol:
             today, five_day = get_stock_real_data(global_symbol)
@@ -204,16 +204,17 @@ def log_request_response(f):
 
 
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
+#@socketio.on('connect')
+#def handle_connect():
+ #   print('Client connected')
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
+#@socketio.on('disconnect')
+#def handle_disconnect():
+   # print('Client disconnected')
 
 if __name__ == '__main__':
-    thread = threading.Thread(target=background_thread)
-    thread.daemon = True
-    thread.start()
-    socketio.run(app, host='0.0.0.0', port=3000, debug=True)
+    app.run(host='0.0.0.0', port=3000 )
+    #thread = threading.Thread(target=background_thread)
+    #thread.daemon = True
+    #thread.start()
+    #socketio.run(app, host='0.0.0.0', port=3000, debug=True)

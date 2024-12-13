@@ -4,8 +4,8 @@ import { json } from 'react-router-dom';
 import io from 'socket.io-client';
 
 
-const socket = io('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com');
-const API_URL = 'http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com/api';
+//const socket = io('http://ec2-3-138-198-12.us-east-2.compute.amazonaws.com'); //http://127.0.0.1:3000
+const API_URL = 'http://127.0.0.1:3000/api';
 
 export const handleDownload = async (symbol, setData, setDownloaded) => {
     try {
@@ -54,7 +54,7 @@ export const handleFetchHistory = async (symbol, startDate, endDate, setData) =>
     }
 };
 
-export const useRealtimeUpdates = (setData) => {
+/*export const useRealtimeUpdates = (setData) => {
     console.log('useRealtimeUpdates');
     useEffect(() => {
         socket.on('realtime_update', (data) => {
@@ -66,7 +66,7 @@ export const useRealtimeUpdates = (setData) => {
             socket.off('realtime_update');
         };
     }, [setData]);
-};
+};*/
 
 export class DataAdapter {
     async fetchData(symbol, params) {
